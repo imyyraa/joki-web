@@ -63,30 +63,45 @@ async function Isi({
     (g) => !kodeAktif.has(g.kode)
   )
 
-  const kelas = 'mt-1 w-full rounded border px-3 py-2'
+  const kelas = 'mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm'
+  const kelasPilih = 'mt-1 rounded-md border bg-background px-3 py-2 text-sm'
 
   return (
     <>
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-xl font-bold sm:text-2xl">
           {w.nama}
           {!w.aktif && (
-            <span className="ml-2 text-base font-normal opacity-60">
+            <span className="ml-2 text-base font-normal text-muted-foreground">
               (nonaktif)
             </span>
           )}
         </h1>
-        <Link href="/admin/worker" className="text-sm underline">
+        <Link
+          href="/admin/worker"
+          className="rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-muted"
+        >
           Kembali
         </Link>
       </div>
 
-      {galat && <p className="mb-4 text-sm text-red-600">{galat}</p>}
-      {ok && <p className="mb-4 text-sm text-green-600">{ok}</p>}
+      {galat && (
+        <p className="mb-4 rounded-md border border-red-600/40 bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-300">
+          {galat}
+        </p>
+      )}
+      {ok && (
+        <p className="mb-4 rounded-md border border-green-600/40 bg-green-500/10 px-3 py-2 text-sm text-green-800 dark:text-green-300">
+          {ok}
+        </p>
+      )}
 
       <section className="mb-8">
         <h2 className="mb-2 text-lg font-semibold">Data worker</h2>
-        <form action={ubahWorker} className="max-w-md space-y-3">
+        <form
+          action={ubahWorker}
+          className="w-full space-y-3 rounded-md border p-4 sm:p-6"
+        >
           <input type="hidden" name="id" value={w.id} />
           <div>
             <label htmlFor="nama" className="block text-sm font-medium">
@@ -111,8 +126,11 @@ async function Isi({
               className={kelas}
             />
           </div>
-                    <div>
-            <label htmlFor="potongan_persen" className="block text-sm font-medium">
+          <div>
+            <label
+              htmlFor="potongan_persen"
+              className="block text-sm font-medium"
+            >
               Potongan toko (%)
             </label>
             <input
@@ -122,9 +140,9 @@ async function Isi({
               defaultValue={String(w.potongan_persen)}
               className={kelas}
             />
-            <p className="mt-1 text-xs opacity-70">
-              Isi 0 untuk CS atau pekerja yang tidak dipotong. Berlaku untuk order
-              berikutnya, order lama tidak berubah.
+            <p className="mt-1 text-xs text-muted-foreground">
+              Isi 0 untuk CS atau pekerja yang tidak dipotong. Berlaku untuk
+              order berikutnya, order lama tidak berubah.
             </p>
           </div>
           <div>
@@ -139,7 +157,7 @@ async function Isi({
               className={kelas}
             />
           </div>
-          <button className="rounded bg-black px-4 py-2 text-sm text-white">
+          <button className="w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90 sm:w-auto">
             Simpan data
           </button>
         </form>
@@ -147,7 +165,7 @@ async function Isi({
 
       <section className="mb-8">
         <h2 className="mb-2 text-lg font-semibold">Status</h2>
-        <p className="mb-2 text-sm opacity-70">
+        <p className="mb-2 text-sm text-muted-foreground">
           Worker nonaktif hilang dari Rekap dan daftar prioritas, tetapi seluruh
           riwayat ordernya tetap tersimpan.
         </p>
@@ -160,7 +178,7 @@ async function Isi({
                 ? 'Nonaktifkan worker ini?'
                 : 'Aktifkan kembali worker ini?'
             }
-            className="rounded border px-4 py-2 text-sm"
+            className="rounded-md border px-4 py-2 text-sm font-medium hover:bg-muted"
           >
             {w.aktif ? 'Nonaktifkan worker' : 'Aktifkan worker'}
           </TombolKonfirmasi>
@@ -170,13 +188,15 @@ async function Isi({
       <section className="mb-8">
         <h2 className="mb-2 text-lg font-semibold">Game yang dipegang</h2>
         {aktif.length === 0 ? (
-          <p className="text-sm opacity-70">Belum memegang game apa pun.</p>
+          <p className="text-sm text-muted-foreground">
+            Belum memegang game apa pun.
+          </p>
         ) : (
           <ul className="space-y-2">
             {aktif.map((t) => (
               <li
                 key={t.id}
-                className="flex flex-wrap items-center gap-3 rounded border p-3 text-sm"
+                className="flex flex-wrap items-center gap-3 rounded-md border p-3 text-sm"
               >
                 <span className="w-16 font-semibold">{t.games.kode}</span>
                 <form action={ubahStatusGame} className="flex items-center gap-2">
@@ -185,24 +205,26 @@ async function Isi({
                   <select
                     name="status"
                     defaultValue={t.status}
-                    className="rounded border px-2 py-1"
+                    className="rounded-md border bg-background px-2 py-1.5"
                   >
                     <option value="normal">Normal</option>
                     <option value="cadangan">Cadangan</option>
                   </select>
-                  <button className="rounded border px-3 py-1">Simpan</button>
+                  <button className="rounded-md border px-3 py-1.5 font-medium hover:bg-muted">
+                    Simpan
+                  </button>
                 </form>
                 <form action={keluarkanGame}>
                   <input type="hidden" name="id" value={t.id} />
                   <input type="hidden" name="worker_id" value={w.id} />
                   <TombolKonfirmasi
                     pesan={`Keluarkan worker dari ${t.games.kode}? Riwayat tetap tersimpan.`}
-                    className="text-red-600 underline"
+                    className="text-red-600 underline dark:text-red-400"
                   >
                     Keluarkan dari game
                   </TombolKonfirmasi>
                 </form>
-                <span className="text-xs opacity-60">
+                <span className="text-xs text-muted-foreground">
                   sejak {tanggalIndo(t.mulai)}
                 </span>
               </li>
@@ -214,7 +236,9 @@ async function Isi({
       <section className="mb-8">
         <h2 className="mb-2 text-lg font-semibold">Tambah ke game</h2>
         {gameTersedia.length === 0 ? (
-          <p className="text-sm opacity-70">Sudah memegang semua game.</p>
+          <p className="text-sm text-muted-foreground">
+            Sudah memegang semua game.
+          </p>
         ) : (
           <form action={tambahGame} className="flex flex-wrap items-end gap-3">
             <input type="hidden" name="worker_id" value={w.id} />
@@ -227,7 +251,7 @@ async function Isi({
                 name="game_id"
                 required
                 defaultValue=""
-                className="mt-1 rounded border px-3 py-2"
+                className={kelasPilih}
               >
                 <option value="" disabled>
                   Pilih game
@@ -247,13 +271,13 @@ async function Isi({
                 id="status"
                 name="status"
                 defaultValue="normal"
-                className="mt-1 rounded border px-3 py-2"
+                className={kelasPilih}
               >
                 <option value="normal">Normal</option>
                 <option value="cadangan">Cadangan</option>
               </select>
             </div>
-            <button className="rounded bg-black px-4 py-2 text-sm text-white">
+            <button className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90">
               Tambahkan
             </button>
           </form>
@@ -263,7 +287,9 @@ async function Isi({
       <section>
         <h2 className="mb-2 text-lg font-semibold">Riwayat game</h2>
         {riwayat.length === 0 ? (
-          <p className="text-sm opacity-70">Belum ada riwayat pindah game.</p>
+          <p className="text-sm text-muted-foreground">
+            Belum ada riwayat pindah game.
+          </p>
         ) : (
           <ul className="space-y-1 text-sm">
             {riwayat.map((t) => (
@@ -287,7 +313,7 @@ export default function HalamanKelolaWorker({
   searchParams: Promise<{ galat?: string; ok?: string }>
 }) {
   return (
-    <main className="mx-auto max-w-3xl p-6">
+    <main className="mx-auto w-full max-w-2xl p-4 sm:p-6">
       <Suspense fallback={<p>Memuat...</p>}>
         <Isi params={params} searchParams={searchParams} />
       </Suspense>

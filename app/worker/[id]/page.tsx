@@ -36,10 +36,20 @@ type Order = {
 
 function Kartu({ label, nilai }: { label: string; nilai: string }) {
   return (
-    <div className="rounded border p-3">
-      <p className="text-xs opacity-70">{label}</p>
-      <p className="mt-1 font-semibold">{nilai}</p>
+    <div className="min-w-0 rounded-md border bg-muted/50 p-3">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-1 break-words font-semibold tabular-nums">{nilai}</p>
     </div>
+  )
+}
+
+function Lencana({ teks, warna }: { teks: string; warna: string }) {
+  return (
+    <span
+      className={`inline-block whitespace-nowrap rounded px-2 py-0.5 text-xs font-medium ${warna}`}
+    >
+      {teks}
+    </span>
   )
 }
 
@@ -85,13 +95,13 @@ async function Isi({ params }: { params: Promise<{ id: string }> }) {
     <>
       <Navigasi aktif="" />
 
-      <div className="mb-4 flex items-start justify-between gap-4">
-        <div>
-          <Link href="/" className="text-sm underline">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0">
+          <Link href="/" className="text-sm text-primary underline">
             ← Rekap
           </Link>
-          <h1 className="mt-2 text-2xl font-bold">{r.nama}</h1>
-          <p className="mt-1 text-sm opacity-70">
+          <h1 className="mt-2 text-xl font-bold sm:text-2xl">{r.nama}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Game: {r.game_dijoki ?? '-'}
           </p>
         </div>
@@ -111,70 +121,109 @@ async function Isi({ params }: { params: Promise<{ id: string }> }) {
       </div>
 
       {error ? (
-        <p className="text-red-600">Gagal memuat order: {error.message}</p>
+        <p className="text-red-600 dark:text-red-400">
+          Gagal memuat order: {error.message}
+        </p>
       ) : orders.length === 0 ? (
         <p>Belum ada order.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-250 border-collapse text-sm">
-            <thead>
-              <tr className="border-b text-left">
-                <th className="py-2 pr-3">Kode</th>
-                <th className="py-2 pr-3">Game</th>
-                <th className="py-2 pr-3">Joki</th>
-                <th className="py-2 pr-3 text-right">Harga</th>
-                <th className="py-2 pr-3 text-right">Charge</th>
-                <th className="py-2 pr-3 text-right">Refund</th>
-                <th className="py-2 pr-3 text-right">Total</th>
-                <th className="py-2 pr-3">Tanggal</th>
-                <th className="py-2 pr-3">Progress</th>
-                <th className="py-2 pr-3">Kas</th>
-                <th className="py-2 pr-3 text-right">Dana di kas</th>
-                <th className="py-2">Catatan</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((o) => (
-                <tr key={o.id} className="border-b align-top">
-                  <td className="py-2 pr-3 whitespace-nowrap">{o.kode}</td>
-                  <td className="py-2 pr-3">
-                    <Link href={`/game/${o.game}`} className="underline">
-                      {o.game}
-                    </Link>
-                  </td>
-                  <td className="py-2 pr-3">{o.nama_joki}</td>
-                  <td className="py-2 pr-3 text-right">{rupiah(o.harga)}</td>
-                  <td className="py-2 pr-3 text-right">
-                    {o.charge ? rupiah(o.charge) : '-'}
-                  </td>
-                  <td className="py-2 pr-3 text-right">
-                    {o.refund ? rupiah(o.refund) : '-'}
-                  </td>
-                  <td className="py-2 pr-3 text-right">
-                    {rupiah(o.total_harga)}
-                  </td>
-                  <td className="py-2 pr-3 whitespace-nowrap">
-                    {tanggalIndo(o.tanggal)}
-                  </td>
-                  <td className="py-2 pr-3">
-                    {o.progress === 'selesai' ? 'Selesai' : 'Progress'}
-                  </td>
-                  <td className="py-2 pr-3">
-                    {o.kas === 'dibayarkan' ? 'Dibayarkan' : 'Disimpan'}
-                  </td>
-                  <td
-                    className={`py-2 pr-3 text-right ${
-                      o.dana_di_kas < 0 ? 'font-semibold text-red-600' : ''
-                    }`}
-                  >
-                    {rupiah(o.dana_di_kas)}
-                  </td>
-                  <td className="py-2">{o.catatan}</td>
+        <>
+          <p className="mb-2 text-xs text-muted-foreground sm:hidden">
+            Geser tabel ke kiri-kanan untuk melihat semua kolom.
+          </p>
+          <div className="overflow-x-auto rounded-md border">
+            <table className="w-full min-w-250 border-collapse text-sm">
+              <thead>
+                <tr className="border-b bg-muted text-left text-muted-foreground">
+                  <th className="px-3 py-2 font-medium">Kode</th>
+                  <th className="px-3 py-2 font-medium">Game</th>
+                  <th className="px-3 py-2 font-medium">Joki</th>
+                  <th className="px-3 py-2 text-right font-medium">Harga</th>
+                  <th className="px-3 py-2 text-right font-medium">Charge</th>
+                  <th className="px-3 py-2 text-right font-medium">Refund</th>
+                  <th className="px-3 py-2 text-right font-medium">Total</th>
+                  <th className="px-3 py-2 font-medium">Tanggal</th>
+                  <th className="px-3 py-2 font-medium">Progress</th>
+                  <th className="px-3 py-2 font-medium">Kas</th>
+                  <th className="px-3 py-2 text-right font-medium">
+                    Dana di kas
+                  </th>
+                  <th className="px-3 py-2 font-medium">Catatan</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {orders.map((o) => (
+                  <tr
+                    key={o.id}
+                    className="border-b align-top last:border-b-0 hover:bg-muted/50"
+                  >
+                    <td className="whitespace-nowrap px-3 py-2">{o.kode}</td>
+                    <td className="px-3 py-2">
+                      <Link
+                        href={`/game/${o.game}`}
+                        className="text-primary underline"
+                      >
+                        {o.game}
+                      </Link>
+                    </td>
+                    <td className="min-w-40 px-3 py-2">{o.nama_joki}</td>
+                    <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums">
+                      {rupiah(o.harga)}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums">
+                      {o.charge ? rupiah(o.charge) : '-'}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums">
+                      {o.refund ? rupiah(o.refund) : '-'}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums">
+                      {rupiah(o.total_harga)}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2">
+                      {tanggalIndo(o.tanggal)}
+                    </td>
+                    <td className="px-3 py-2">
+                      {o.progress === 'selesai' ? (
+                        <Lencana
+                          teks="Selesai"
+                          warna="bg-green-500/20 text-green-800 dark:text-green-300"
+                        />
+                      ) : (
+                        <Lencana
+                          teks="Progress"
+                          warna="bg-yellow-500/20 text-yellow-800 dark:text-yellow-300"
+                        />
+                      )}
+                    </td>
+                    <td className="px-3 py-2">
+                      {o.kas === 'dibayarkan' ? (
+                        <Lencana
+                          teks="Dibayarkan"
+                          warna="bg-green-500/20 text-green-800 dark:text-green-300"
+                        />
+                      ) : (
+                        <Lencana
+                          teks="Disimpan"
+                          warna="bg-blue-500/20 text-blue-800 dark:text-blue-300"
+                        />
+                      )}
+                    </td>
+                    <td
+                      className={`whitespace-nowrap px-3 py-2 text-right tabular-nums ${
+                        o.dana_di_kas < 0
+                          ? 'font-semibold text-red-600 dark:text-red-400'
+                          : ''
+                      }`}
+                    >
+                      {rupiah(o.dana_di_kas)}
+                    </td>
+                    <td className="min-w-48 px-3 py-2">{o.catatan}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </>
   )
@@ -186,7 +235,7 @@ export default function HalamanWorker({
   params: Promise<{ id: string }>
 }) {
   return (
-    <main className="mx-auto max-w-7xl p-6">
+    <main className="mx-auto w-full max-w-7xl p-4 sm:p-6">
       <Suspense fallback={<p>Memuat...</p>}>
         <Isi params={params} />
       </Suspense>

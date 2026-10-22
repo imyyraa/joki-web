@@ -22,7 +22,6 @@ export async function ubahOrder(
     nama_joki: ambil('nama_joki'),
     harga: ambil('harga'),
     charge: ambil('charge'),
-    refund: ambil('refund'),
     tanggal: ambil('tanggal'),
     progress: ambil('progress'),
     no_customer: ambil('no_customer'),
@@ -33,13 +32,13 @@ export async function ubahOrder(
   const orderId = Number(ambil('order_id'))
   const buktiBayar = ambil('bukti_bayar')
   const buktiSelesai = ambil('bukti_selesai')
+  const buktiCharge = ambil('bukti_charge')
 
   const gagal = (error: string): HasilUbah => ({ error, nilai })
 
   const workerId = Number(nilai.worker_id)
   const harga = angka('harga')
   const charge = angka('charge')
-  const refund = angka('refund')
 
   if (!orderId) return gagal('Order tidak valid.')
   if (!workerId) return gagal('Pilih worker terlebih dahulu.')
@@ -59,7 +58,6 @@ export async function ubahOrder(
     p_nama_joki: nilai.nama_joki,
     p_harga: harga,
     p_charge: charge,
-    p_refund: refund,
     p_tanggal: nilai.tanggal,
     p_progress: nilai.progress,
     p_catatan: nilai.catatan,
@@ -67,6 +65,7 @@ export async function ubahOrder(
     p_no_customer: nilai.no_customer,
     p_bukti_bayar: buktiBayar,
     p_bukti_selesai: buktiSelesai,
+    p_bukti_charge: buktiCharge,
   })
 
   if (error) return gagal(`Gagal menyimpan: ${error.message}`)

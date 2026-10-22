@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type ChangeEvent } from 'react'
+import { useId, useState, type ChangeEvent } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { kompresGambar } from '@/lib/kompres-gambar'
 
@@ -13,6 +13,7 @@ export default function UnggahBukti({
   label: string
   onSibuk?: (sibuk: boolean) => void
 }) {
+  const idIsian = useId()
   const [path, setPath] = useState('')
   const [info, setInfo] = useState('')
   const [galat, setGalat] = useState('')
@@ -59,17 +60,38 @@ export default function UnggahBukti({
 
   return (
     <div>
-      <label className="block text-sm font-medium">{label}</label>
-      <input
-        type="file"
-        accept="image/*"
-        onChange={saatPilih}
-        className="mt-1 w-full text-sm"
-      />
-      <input type="hidden" name={nama} value={path} />
-      {sibuk && <p className="mt-1 text-xs">Mengunggah...</p>}
-      {info && <p className="mt-1 text-xs text-green-600">{info}</p>}
-      {galat && <p className="mt-1 text-xs text-red-600">{galat}</p>}
+      <label htmlFor={idIsian} className="block text-sm font-medium">
+        {label}
+      </label>
+      <div className="mt-1 rounded-md border border-dashed bg-muted/30 p-3">
+        <input
+          id={idIsian}
+          type="file"
+          accept="image/*"
+          onChange={saatPilih}
+          disabled={sibuk}
+          className="w-full text-sm text-muted-foreground file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-primary-foreground hover:file:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        />
+        <input type="hidden" name={nama} value={path} />
+        <div aria-live="polite">
+          {sibuk && (
+            <p className="mt-2 text-xs text-muted-foreground">Mengunggah...</p>
+          )}
+          {info && (
+            <p className="mt-2 text-xs text-green-700 dark:text-green-400">
+              {info}
+            </p>
+          )}
+        </div>
+        {galat && (
+          <p
+            role="alert"
+            className="mt-2 text-xs text-red-600 dark:text-red-400"
+          >
+            {galat}
+          </p>
+        )}
+      </div>
     </div>
   )
 }

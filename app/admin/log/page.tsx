@@ -230,16 +230,16 @@ async function Isi({ searchParams }: { searchParams: Promise<Param> }) {
     return ringkasDiff(d as Diff, terjemah)
   }
 
-  const kelas = 'rounded border px-3 py-2 text-sm'
+  const kelas = 'rounded-md border bg-background px-3 py-2 text-sm'
 
   return (
     <>
-      <div className="mb-4 flex items-start justify-between gap-4">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <Link href="/" className="text-sm underline">
+          <Link href="/" className="text-sm text-primary underline">
             ← Rekap
           </Link>
-          <h1 className="mt-2 text-2xl font-bold">Log perubahan</h1>
+          <h1 className="mt-2 text-xl font-bold sm:text-2xl">Log perubahan</h1>
         </div>
         <Suspense fallback={null}>
           <StatusLogin />
@@ -251,22 +251,26 @@ async function Isi({ searchParams }: { searchParams: Promise<Param> }) {
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <Link
           href={tautan({ jenis: 'order', hal: '1' })}
-          className={`rounded px-3 py-1.5 text-sm ${
-            jenis === 'order' ? 'bg-foreground text-background' : 'border'
+          className={`rounded-md px-3 py-2 text-sm font-medium ${
+            jenis === 'order'
+              ? 'bg-primary text-primary-foreground'
+              : 'border hover:bg-muted'
           }`}
         >
           Order
         </Link>
         <Link
           href={tautan({ jenis: 'kelola', hal: '1' })}
-          className={`rounded px-3 py-1.5 text-sm ${
-            jenis === 'kelola' ? 'bg-foreground text-background' : 'border'
+          className={`rounded-md px-3 py-2 text-sm font-medium ${
+            jenis === 'kelola'
+              ? 'bg-primary text-primary-foreground'
+              : 'border hover:bg-muted'
           }`}
         >
           Pengelolaan
         </Link>
 
-        <form method="get" className="ml-auto flex items-center gap-2">
+        <form method="get" className="flex items-center gap-2 sm:ml-auto">
           {jenis !== 'order' && <input type="hidden" name="jenis" value={jenis} />}
           <select name="pelaku" defaultValue={pelaku} className={kelas}>
             <option value="">Semua pelaku</option>
@@ -276,45 +280,55 @@ async function Isi({ searchParams }: { searchParams: Promise<Param> }) {
               </option>
             ))}
           </select>
-          <button className={kelas}>Terapkan</button>
+          <button className={`${kelas} font-medium hover:bg-muted`}>
+            Terapkan
+          </button>
         </form>
       </div>
 
       {pesanError ? (
-        <p className="text-red-600">Gagal memuat log: {pesanError}</p>
+        <p className="text-red-600 dark:text-red-400">
+          Gagal memuat log: {pesanError}
+        </p>
       ) : total === 0 ? (
-        <p className="text-sm opacity-70">Belum ada catatan.</p>
+        <p className="text-sm text-muted-foreground">Belum ada catatan.</p>
       ) : (
         <>
-          <p className="mb-2 text-xs opacity-70">
+          <p className="mb-2 text-xs text-muted-foreground">
             {total} catatan. Halaman {hal} dari {jumlahHalaman}.
           </p>
-          <div className="overflow-x-auto">
+          <p className="mb-2 text-xs text-muted-foreground sm:hidden">
+            Geser tabel ke kiri-kanan untuk melihat semua kolom.
+          </p>
+          <div className="overflow-x-auto rounded-md border">
             <table className="w-full min-w-200 border-collapse text-sm">
               <thead>
-                <tr className="border-b text-left">
-                  <th className="py-2 pr-3">Waktu</th>
-                  <th className="py-2 pr-3">Pelaku</th>
-                  <th className="py-2 pr-3">
+                <tr className="border-b bg-muted text-left text-muted-foreground">
+                  <th className="px-3 py-2 font-medium">Waktu</th>
+                  <th className="px-3 py-2 font-medium">Pelaku</th>
+                  <th className="px-3 py-2 font-medium">
                     {jenis === 'order' ? 'Order' : 'Objek'}
                   </th>
-                  <th className="py-2 pr-3">Aksi</th>
-                  <th className="py-2">Keterangan</th>
+                  <th className="px-3 py-2 font-medium">Aksi</th>
+                  <th className="px-3 py-2 font-medium">Keterangan</th>
                 </tr>
               </thead>
               <tbody>
                 {jenis === 'order'
                   ? barisOrder.map((r) => (
-                      <tr key={r.id} className="border-b align-top">
-                        <td className="py-2 pr-3 whitespace-nowrap">
+                      <tr
+                        key={r.id}
+                        className="border-b align-top last:border-b-0 hover:bg-muted/50"
+                      >
+                        <td className="whitespace-nowrap px-3 py-2">
                           {waktuIndo(r.waktu)}
                         </td>
-                        <td className="py-2 pr-3">{pelakuNama(r.oleh)}</td>
-                        <td className="py-2 pr-3 whitespace-nowrap">
+                        <td className="px-3 py-2">{pelakuNama(r.oleh)}</td>
+                        <td className="whitespace-nowrap px-3 py-2">
                           {r.orders ? (
                             <Link
                               href={`/game/${r.orders.games.kode}`}
-                              className="underline"
+                              className="text-primary underline"
                             >
                               {r.orders.kode}
                             </Link>
@@ -322,10 +336,10 @@ async function Isi({ searchParams }: { searchParams: Promise<Param> }) {
                             '-'
                           )}
                         </td>
-                        <td className="py-2 pr-3 whitespace-nowrap">
+                        <td className="whitespace-nowrap px-3 py-2">
                           {LABEL_ORDER[r.aksi] ?? r.aksi}
                         </td>
-                        <td className="py-2">
+                        <td className="px-3 py-2">
                           {keteranganOrder(r).map((t, i) => (
                             <div key={i}>{t}</div>
                           ))}
@@ -333,16 +347,19 @@ async function Isi({ searchParams }: { searchParams: Promise<Param> }) {
                       </tr>
                     ))
                   : barisKelola.map((r) => (
-                      <tr key={r.id} className="border-b align-top">
-                        <td className="py-2 pr-3 whitespace-nowrap">
+                      <tr
+                        key={r.id}
+                        className="border-b align-top last:border-b-0 hover:bg-muted/50"
+                      >
+                        <td className="whitespace-nowrap px-3 py-2">
                           {waktuIndo(r.waktu)}
                         </td>
-                        <td className="py-2 pr-3">{pelakuNama(r.oleh)}</td>
-                        <td className="py-2 pr-3">{objekKelola(r)}</td>
-                        <td className="py-2 pr-3 whitespace-nowrap">
+                        <td className="px-3 py-2">{pelakuNama(r.oleh)}</td>
+                        <td className="px-3 py-2">{objekKelola(r)}</td>
+                        <td className="whitespace-nowrap px-3 py-2">
                           {LABEL_KELOLA[r.aksi] ?? r.aksi}
                         </td>
-                        <td className="py-2">
+                        <td className="px-3 py-2">
                           {keteranganKelola(r).map((t, i) => (
                             <div key={i}>{t}</div>
                           ))}
@@ -355,12 +372,18 @@ async function Isi({ searchParams }: { searchParams: Promise<Param> }) {
 
           <div className="mt-4 flex items-center gap-4 text-sm">
             {hal > 1 && (
-              <Link href={tautan({ hal: String(hal - 1) })} className="underline">
+              <Link
+                href={tautan({ hal: String(hal - 1) })}
+                className="text-primary underline"
+              >
                 ← Lebih baru
               </Link>
             )}
             {hal < jumlahHalaman && (
-              <Link href={tautan({ hal: String(hal + 1) })} className="underline">
+              <Link
+                href={tautan({ hal: String(hal + 1) })}
+                className="text-primary underline"
+              >
                 Lebih lama →
               </Link>
             )}
@@ -377,7 +400,7 @@ export default function HalamanLog({
   searchParams: Promise<Param>
 }) {
   return (
-    <main className="mx-auto max-w-6xl p-6">
+    <main className="mx-auto w-full max-w-6xl p-4 sm:p-6">
       <Suspense fallback={<p>Memuat...</p>}>
         <Isi searchParams={searchParams} />
       </Suspense>

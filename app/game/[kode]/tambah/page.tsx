@@ -50,9 +50,14 @@ async function Isi({ params }: { params: Promise<{ kode: string }> }) {
   return (
     <>
       <Navigasi aktif={kodeGame} />
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold">Tambah order {kodeGame}</h1>
-        <Link href={`/game/${kodeGame}`} className="text-sm underline">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-xl font-bold sm:text-2xl">
+          Tambah order {kodeGame}
+        </h1>
+        <Link
+          href={`/game/${kodeGame}`}
+          className="rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-muted"
+        >
           Kembali
         </Link>
       </div>
@@ -67,7 +72,7 @@ export default function HalamanTambah({
   params: Promise<{ kode: string }>
 }) {
   return (
-    <main className="mx-auto max-w-3xl p-6">
+    <main className="mx-auto w-full max-w-2xl p-4 sm:p-6">
       <Suspense fallback={<p>Memuat...</p>}>
         <Isi params={params} />
       </Suspense>

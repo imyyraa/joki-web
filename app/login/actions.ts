@@ -11,13 +11,28 @@ export async function login(
   const password = String(formData.get('password') ?? '')
 
   const supabase = await createClient()
-  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
 
-  if (error) {
+  if (error || !data.user) {
     return { error: 'Email atau password salah.' }
   }
 
-  redirect('/halo')
+  // Pastikan akun terdaftar dan aktif. Jika tidak, sesi dibatalkan.
+  const { data: profil } = await supabase
+    .from('profiles')
+    .select('aktif')
+    .eq('id', data.user.id)
+    .maybeSingle()
+
+  if (!profil || !profil.aktif) {
+    await supabase.auth.signOut()
+    return { error: 'Akun ini tidak aktif atau belum terdaftar. Hubungi admin.' }
+  }
+
+  redirect('/')
 }
 
 export async function logout() {

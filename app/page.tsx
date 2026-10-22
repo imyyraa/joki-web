@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import { Suspense, type ReactNode } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { ambilPengguna } from '@/lib/auth'
@@ -16,6 +16,32 @@ type BarisRekap = {
   game_dijoki: string | null
 }
 
+function Isian({
+  label,
+  penuh,
+  children,
+}: {
+  label: string
+  penuh?: boolean
+  children: ReactNode
+}) {
+  return (
+    <div className={penuh ? 'col-span-2' : ''}>
+      <dt className="text-xs text-muted-foreground">{label}</dt>
+      <dd className="mt-0.5 break-words font-medium tabular-nums">{children}</dd>
+    </div>
+  )
+}
+
+function Ringkas({ label, nilai }: { label: string; nilai: string }) {
+  return (
+    <div className="rounded-xl border bg-surface p-3">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-1 text-sm font-semibold tabular-nums">{nilai}</p>
+    </div>
+  )
+}
+
 async function TabelRekap() {
   const supabase = await createClient()
   const pengguna = await ambilPengguna()
@@ -28,7 +54,11 @@ async function TabelRekap() {
     .order('nama')
 
   if (error) {
-    return <p className="text-red-600">Gagal memuat data: {error.message}</p>
+    return (
+      <p className="text-red-600 dark:text-red-400">
+        Gagal memuat data: {error.message}
+      </p>
+    )
   }
 
   const baris = (data ?? []) as BarisRekap[]
@@ -50,82 +80,194 @@ async function TabelRekap() {
   const totalTagihan = baris.reduce((a, b) => a + b.tagihan_ke_worker, 0)
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-160 border-collapse text-sm">
-        <thead>
-          <tr className="border-b text-left">
-            <th className="py-2 pr-4">Worker</th>
-            <th className="py-2 pr-4">Game</th>
-            <th className="py-2 pr-4 text-right">Total orderan</th>
-            <th className="py-2 pr-4 text-right">Total penghasilan</th>
-            <th className="py-2 pr-4 text-right">Kas tersimpan</th>
-            {totalTagihan > 0 && (
-              <th className="py-2 pr-4 text-right">Tagihan ke worker</th>
-            )}
-            {pengguna && <th className="py-2">Rekening</th>}
-          </tr>
-        </thead>
-        <tbody>
+    <>
+      {/* Tampilan HP: kartu ringkasan + baris accordion */}
+      <div className="sm:hidden">
+        <div className="mb-3 grid grid-cols-2 gap-2">
+          <Ringkas label="Total orderan" nilai={String(totalOrderan)} />
+          <Ringkas label="Total penghasilan" nilai={rupiah(totalPenghasilan)} />
+          <Ringkas label="Kas tersimpan" nilai={rupiah(totalKas)} />
+          {totalTagihan > 0 && (
+            <Ringkas label="Tagihan ke worker" nilai={rupiah(totalTagihan)} />
+          )}
+        </div>
+
+        <ul className="space-y-2">
           {baris.map((b) => (
-            <tr key={b.worker_id} className="border-b align-top">
-              <td className="py-2 pr-4 font-medium">
-                <Link href={`/worker/${b.worker_id}`} className="underline">
-                  {b.nama}
-                </Link>
+            <li key={b.worker_id}>
+              <details className="group rounded-xl border bg-surface open:border-primary/60">
+                <summary className="flex cursor-pointer list-none items-center gap-3 px-3 py-3 [&::-webkit-details-marker]:hidden">
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold">
+                      {b.nama}
+                    </span>
+                    <span className="block truncate text-xs text-muted-foreground">
+                      {b.game_dijoki ?? '-'}
+                    </span>
+                  </span>
+                  <span className="shrink-0 text-right">
+                    <span className="block text-sm font-semibold tabular-nums">
+                      {rupiah(b.total_penghasilan)}
+                    </span>
+                    {b.tagihan_ke_worker > 0 && (
+                      <span className="block text-[11px] font-medium text-red-600 dark:text-red-400">
+                        Ada tagihan
+                      </span>
+                    )}
+                  </span>
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="18"
+                    height="18"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                    className="shrink-0 text-muted-foreground transition-transform group-open:rotate-90"
+                  >
+                    <path d="M9 6l6 6-6 6" />
+                  </svg>
+                </summary>
+
+                <div className="border-t px-3 py-3">
+                  <dl className="grid grid-cols-2 gap-x-3 gap-y-3 text-sm">
+                    <Isian label="Total orderan">{b.total_orderan}</Isian>
+                    <Isian label="Total penghasilan">
+                      {rupiah(b.total_penghasilan)}
+                    </Isian>
+                    <Isian label="Kas tersimpan">
+                      {rupiah(b.total_kas_tersimpan)}
+                    </Isian>
+                    {b.tagihan_ke_worker > 0 && (
+                      <Isian label="Tagihan ke worker">
+                        <span className="text-red-600 dark:text-red-400">
+                          {rupiah(b.tagihan_ke_worker)}
+                        </span>
+                      </Isian>
+                    )}
+                    {pengguna && (
+                      <Isian label="Rekening" penuh>
+                        {rekening.get(b.worker_id) ?? '-'}
+                      </Isian>
+                    )}
+                  </dl>
+                  <Link
+                    href={`/worker/${b.worker_id}`}
+                    className="mt-4 flex items-center justify-center rounded-xl bg-primary px-3 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90"
+                  >
+                    Lihat order
+                  </Link>
+                </div>
+              </details>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Tampilan layar lebar: tabel */}
+      <div className="hidden overflow-x-auto rounded-md border sm:block">
+        <table className="w-full min-w-160 border-collapse text-sm">
+          <thead>
+            <tr className="border-b bg-muted text-left text-muted-foreground">
+              <th className="px-3 py-2 font-medium">Worker</th>
+              <th className="px-3 py-2 font-medium">Game</th>
+              <th className="px-3 py-2 text-right font-medium">Total orderan</th>
+              <th className="px-3 py-2 text-right font-medium">
+                Total penghasilan
+              </th>
+              <th className="px-3 py-2 text-right font-medium">Kas tersimpan</th>
+              {totalTagihan > 0 && (
+                <th className="px-3 py-2 text-right font-medium">
+                  Tagihan ke worker
+                </th>
+              )}
+              {pengguna && <th className="px-3 py-2 font-medium">Rekening</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {baris.map((b) => (
+              <tr
+                key={b.worker_id}
+                className="border-b align-top hover:bg-muted/50"
+              >
+                <td className="whitespace-nowrap px-3 py-2 font-medium">
+                  <Link
+                    href={`/worker/${b.worker_id}`}
+                    className="underline underline-offset-2 hover:text-primary"
+                  >
+                    {b.nama}
+                  </Link>
+                </td>
+                <td className="px-3 py-2">{b.game_dijoki ?? '-'}</td>
+                <td className="px-3 py-2 text-right tabular-nums">
+                  {b.total_orderan}
+                </td>
+                <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums">
+                  {rupiah(b.total_penghasilan)}
+                </td>
+                <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums">
+                  {rupiah(b.total_kas_tersimpan)}
+                </td>
+                {totalTagihan > 0 && (
+                  <td
+                    className={`whitespace-nowrap px-3 py-2 text-right tabular-nums ${
+                      b.tagihan_ke_worker > 0
+                        ? 'font-semibold text-red-600 dark:text-red-400'
+                        : ''
+                    }`}
+                  >
+                    {b.tagihan_ke_worker > 0 ? rupiah(b.tagihan_ke_worker) : '-'}
+                  </td>
+                )}
+                {pengguna && (
+                  <td className="whitespace-nowrap px-3 py-2">
+                    {rekening.get(b.worker_id) ?? '-'}
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr className="border-t bg-muted font-semibold">
+              <td className="px-3 py-2" colSpan={2}>
+                Total
               </td>
-              <td className="py-2 pr-4">{b.game_dijoki ?? '-'}</td>
-              <td className="py-2 pr-4 text-right">{b.total_orderan}</td>
-              <td className="py-2 pr-4 text-right">
-                {rupiah(b.total_penghasilan)}
+              <td className="px-3 py-2 text-right tabular-nums">{totalOrderan}</td>
+              <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums">
+                {rupiah(totalPenghasilan)}
               </td>
-              <td className="py-2 pr-4 text-right">
-                {rupiah(b.total_kas_tersimpan)}
+              <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums">
+                {rupiah(totalKas)}
               </td>
               {totalTagihan > 0 && (
-                <td
-                  className={`py-2 pr-4 text-right ${
-                    b.tagihan_ke_worker > 0 ? 'font-semibold text-red-600' : ''
-                  }`}
-                >
-                  {b.tagihan_ke_worker > 0 ? rupiah(b.tagihan_ke_worker) : '-'}
+                <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums">
+                  {rupiah(totalTagihan)}
                 </td>
               )}
-              {pengguna && (
-                <td className="py-2">{rekening.get(b.worker_id) ?? '-'}</td>
-              )}
+              {pengguna && <td></td>}
             </tr>
-          ))}
-        </tbody>
-        <tfoot>
-          <tr className="font-semibold">
-            <td className="py-2 pr-4" colSpan={2}>
-              Total
-            </td>
-            <td className="py-2 pr-4 text-right">{totalOrderan}</td>
-            <td className="py-2 pr-4 text-right">{rupiah(totalPenghasilan)}</td>
-            <td className="py-2 pr-4 text-right">{rupiah(totalKas)}</td>
-            {totalTagihan > 0 && (
-              <td className="py-2 pr-4 text-right">{rupiah(totalTagihan)}</td>
-            )}
-            {pengguna && <td></td>}
-          </tr>
-        </tfoot>
-      </table>
-    </div>
+          </tfoot>
+        </table>
+      </div>
+    </>
   )
 }
 
 export default function Home() {
   return (
-    <main className="mx-auto max-w-5xl p-6">
-      <Suspense fallback={<div className="mb-6 h-9" />}>
+    <main className="mx-auto w-full max-w-5xl p-4 sm:p-6">
+      <Suspense fallback={<div className="mb-6 hidden h-9 sm:block" />}>
         <Navigasi aktif="rekap" />
       </Suspense>
 
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Rekap Worker</h1>
-          <p className="mt-1 text-sm opacity-70">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4 max-sm:-mt-15">
+        <div className="min-w-0 flex-1 basis-64">
+          <h1 className="flex text-xl font-bold max-sm:min-h-11 max-sm:items-center max-sm:pl-12 sm:text-2xl">
+            Rekap Worker
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Data ini terbuka untuk semua worker dan dihitung otomatis dari
             data order. Klik nama worker untuk melihat semua ordernya.
           </p>
@@ -139,7 +281,7 @@ export default function Home() {
         <TabelRekap />
       </Suspense>
 
-      <p className="mt-6 text-xs opacity-70">
+      <p className="mt-6 text-xs text-muted-foreground">
         Total penghasilan memakai harga penuh. Kas tersimpan adalah bagian
         worker (setelah potongan toko) yang belum dicairkan.
       </p>

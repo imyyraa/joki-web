@@ -76,16 +76,16 @@ async function Isi({
 
   const kodeBerikut = (g: Game) =>
     `#${g.awalan_kode}${String((urutan.get(g.id) ?? 0) + 1).padStart(3, '0')}`
-  const kelas = 'mt-1 w-full rounded border px-3 py-2'
+  const kelas = 'mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm'
 
   return (
     <>
-      <div className="mb-4 flex items-start justify-between gap-4">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <Link href="/" className="text-sm underline">
+          <Link href="/" className="text-sm text-primary underline">
             ← Rekap
           </Link>
-          <h1 className="mt-2 text-2xl font-bold">Kelola Game</h1>
+          <h1 className="mt-2 text-xl font-bold sm:text-2xl">Kelola Game</h1>
         </div>
         <Suspense fallback={null}>
           <StatusLogin />
@@ -94,12 +94,23 @@ async function Isi({
 
       <NavAdmin aktif="game" />
 
-      {galat && <p className="mb-4 text-sm text-red-600">{galat}</p>}
-      {ok && <p className="mb-4 text-sm text-green-600">{ok}</p>}
+      {galat && (
+        <p className="mb-4 rounded-md border border-red-600/40 bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-300">
+          {galat}
+        </p>
+      )}
+      {ok && (
+        <p className="mb-4 rounded-md border border-green-600/40 bg-green-500/10 px-3 py-2 text-sm text-green-800 dark:text-green-300">
+          {ok}
+        </p>
+      )}
 
       <section className="mb-8">
         <h2 className="mb-2 text-lg font-semibold">Tambah game</h2>
-        <form action={tambahGameBaru} className="grid max-w-xl gap-3 sm:grid-cols-2">
+        <form
+          action={tambahGameBaru}
+          className="grid w-full max-w-xl gap-3 rounded-md border p-4 sm:grid-cols-2 sm:p-6"
+        >
           <div>
             <label htmlFor="kode" className="block text-sm font-medium">
               Kode game
@@ -125,10 +136,10 @@ async function Isi({
             />
           </div>
           <div className="sm:col-span-2">
-            <button className="rounded bg-black px-4 py-2 text-sm text-white">
+            <button className="w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90 sm:w-auto">
               Tambah game
             </button>
-            <p className="mt-2 text-xs opacity-70">
+            <p className="mt-2 text-xs text-muted-foreground">
               Kode game menjadi awalan kode order (contoh: GI menghasilkan
               #GI001) dan dipakai di alamat halaman. Keduanya tidak bisa diubah
               setelah dibuat.
@@ -140,7 +151,9 @@ async function Isi({
       <section>
         <h2 className="mb-2 text-lg font-semibold">Daftar game</h2>
         {error ? (
-          <p className="text-red-600">Gagal memuat data: {error.message}</p>
+          <p className="text-red-600 dark:text-red-400">
+            Gagal memuat data: {error.message}
+          </p>
         ) : (
           <ul className="space-y-3">
             {games.map((g) => {
@@ -148,7 +161,9 @@ async function Isi({
               return (
                 <li
                   key={g.id}
-                  className={`rounded border p-3 ${g.aktif ? '' : 'opacity-60'}`}
+                  className={`rounded-md border p-3 sm:p-4 ${
+                    g.aktif ? '' : 'opacity-60'
+                  }`}
                 >
                   <form action={ubahGame} className="grid gap-3 sm:grid-cols-4">
                     <input type="hidden" name="id" value={g.id} />
@@ -179,17 +194,17 @@ async function Isi({
                       />
                     </div>
                     <div className="flex flex-col justify-end gap-1">
-                      <p className="text-xs opacity-70">
+                      <p className="text-xs text-muted-foreground">
                         Kode order berikutnya: {kodeBerikut(g)}
                       </p>
-                      <button className="rounded border px-3 py-2 text-sm">
+                      <button className="rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted">
                         Simpan
                       </button>
                     </div>
                   </form>
 
                   <div className="mt-3 flex flex-wrap items-center gap-3 border-t pt-3 text-sm">
-                    <span className="text-xs opacity-70">
+                    <span className="text-xs text-muted-foreground">
                       {h.order} order · {h.worker} worker aktif · {h.cs} CS
                     </span>
 
@@ -198,7 +213,7 @@ async function Isi({
                         <input type="hidden" name="id" value={g.id} />
                         <TombolKonfirmasi
                           pesan={`Arsipkan ${g.kode}? ${h.worker} worker aktif akan dikeluarkan dari game ini (riwayat tetap), dan game hilang dari tab serta formulir. ${h.order} order lama tetap tersimpan dan total penghasilan tidak berubah.`}
-                          className="rounded border px-3 py-1.5 text-sm"
+                          className="rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-muted"
                         >
                           Arsipkan
                         </TombolKonfirmasi>
@@ -208,7 +223,7 @@ async function Isi({
                         <input type="hidden" name="id" value={g.id} />
                         <TombolKonfirmasi
                           pesan={`Aktifkan kembali ${g.kode}?`}
-                          className="rounded border px-3 py-1.5 text-sm"
+                          className="rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-muted"
                         >
                           Aktifkan kembali
                         </TombolKonfirmasi>
@@ -220,7 +235,7 @@ async function Isi({
                         <input type="hidden" name="id" value={g.id} />
                         <TombolKonfirmasi
                           pesan={`Hapus ${g.kode} secara permanen? Game ini belum punya order. Tindakan ini tidak bisa dibatalkan.`}
-                          className="rounded border border-red-600 px-3 py-1.5 text-sm text-red-600"
+                          className="rounded-md border border-red-600 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-500/10 dark:border-red-400 dark:text-red-400"
                         >
                           Hapus permanen
                         </TombolKonfirmasi>
@@ -243,7 +258,7 @@ export default function HalamanGameAdmin({
   searchParams: Promise<{ galat?: string; ok?: string }>
 }) {
   return (
-    <main className="mx-auto max-w-5xl p-6">
+    <main className="mx-auto w-full max-w-5xl p-4 sm:p-6">
       <Suspense fallback={<p>Memuat...</p>}>
         <Isi searchParams={searchParams} />
       </Suspense>

@@ -82,3 +82,19 @@ export async function batalkanSatu(formData: FormData): Promise<void> {
   })
   kembali(kodeGame, orderId, error ? error.message : undefined)
 }
+
+export async function aturRefund(formData: FormData): Promise<void> {
+  await wajibPeran(['admin'])
+  const kodeGame = String(formData.get('kode_game') ?? '')
+  const orderId = Number(formData.get('order_id'))
+  const jumlah = Number(
+    String(formData.get('refund') ?? '').replace(/\D/g, '') || '0'
+  )
+
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('atur_refund', {
+    p_order_id: orderId,
+    p_refund: jumlah,
+  })
+  kembali(kodeGame, orderId, error ? error.message : undefined)
+}

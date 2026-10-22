@@ -1,26 +1,103 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light dark;
+
+  --background: #f7f8fc;
+  --foreground: #15161c;
+  --surface: #ffffff;
+  --muted: #eceef6;
+  --muted-foreground: #5b5f70;
+  --border: #dfe2ee;
+  --primary: #5448e0;
+  --primary-foreground: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0b0b10;
+    --foreground: #f2f2f7;
+    --surface: #22232d;
+    --muted: #2d2e3a;
+    --muted-foreground: #a3a6b8;
+    --border: #353642;
+    --primary: #6d5ef7;
+    --primary-foreground: #ffffff;
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-surface: var(--surface);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --font-sans: var(--font-poppins);
   --font-mono: var(--font-geist-mono);
+
+  /* Sudut lebih membulat di seluruh aplikasi */
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  /* Tailwind v4 memakai warna teks sebagai warna border bawaan.
+     Aturan ini mengembalikannya ke warna halus di semua halaman. */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--border);
+  }
+
+  /* Semua tabel berlatar abu-abu (tidak hitam pekat) */
+  table {
+    background-color: var(--surface);
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-poppins), system-ui, sans-serif;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Sembunyikan scrollbar pada baris yang bisa digeser */
+.tanpa-scrollbar {
+  scrollbar-width: none;
+}
+.tanpa-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Kolom checkbox hapus order: tersembunyi sampai mode hapus dinyalakan */
+.sel-hapus {
+  display: none;
+}
+[data-hapus="true"] .sel-hapus {
+  display: table-cell;
+}
+
+/* Di HP, ukuran huruf isian minimal 16px agar browser tidak memperbesar layar saat mengetik */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  /* Ruang di bawah halaman untuk navigasi bawah (dipakai di langkah berikutnya) */
+  body:has([data-nav-bawah]) {
+    padding-bottom: 5.5rem;
+  }
 }

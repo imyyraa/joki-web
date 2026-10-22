@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const HALAMAN_DILINDUNGI = ['/halo', '/admin']
+const HALAMAN_DILINDUNGI = ['/admin']
 
 function alihkan(request: NextRequest, tujuan: string, response: NextResponse) {
   const url = request.nextUrl.clone()
@@ -46,7 +46,6 @@ export async function proxy(request: NextRequest) {
   )
 
   if (!sudahLogin && perluLogin) return alihkan(request, '/login', response)
-  if (sudahLogin && path === '/login') return alihkan(request, '/halo', response)
 
   return response
 }

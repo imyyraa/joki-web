@@ -11,7 +11,6 @@ type Awal = {
   nama_joki: string
   harga: string
   charge: string
-  refund: string
   tanggal: string
   progress: string
   no_customer: string
@@ -19,9 +18,21 @@ type Awal = {
   alasan: string
 }
 
-function LihatBukti({ path, label }: { path: string | null; label: string }) {
+function LihatBukti({
+  path,
+  label,
+  bersih,
+}: {
+  path: string | null
+  label: string
+  bersih?: boolean
+}) {
   if (!path) {
-    return <p className="mt-1 text-xs opacity-60">{label}: belum ada</p>
+    return (
+      <p className="mt-1 text-xs text-muted-foreground">
+        {label}: {bersih ? 'bukti sudah dihapus' : 'belum ada'}
+      </p>
+    )
   }
   return (
     <p className="mt-1 text-xs">
@@ -30,7 +41,7 @@ function LihatBukti({ path, label }: { path: string | null; label: string }) {
         href={`/bukti?p=${encodeURIComponent(path)}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="underline"
+        className="text-primary underline"
       >
         lihat bukti saat ini
       </a>
@@ -47,6 +58,8 @@ export default function FormUbah({
   awal,
   buktiBayar,
   buktiSelesai,
+  buktiCharge,
+  dibersihkan,
 }: {
   kodeGame: string
   orderId: number
@@ -56,10 +69,13 @@ export default function FormUbah({
   awal: Awal
   buktiBayar: string | null
   buktiSelesai: string | null
+  buktiCharge: string | null
+  dibersihkan: boolean
 }) {
   const [state, formAction, pending] = useActionState(ubahOrder, undefined)
   const [mengunggah, setMengunggah] = useState(false)
-  const kelas = 'mt-1 w-full rounded border px-3 py-2'
+  const kelas =
+    'mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm'
   const nilai = (state?.nilai as Awal | undefined) ?? awal
 
   const labelWorker = (w: PilihanWorker) =>
@@ -71,14 +87,27 @@ export default function FormUbah({
         : '')
 
   return (
-    <form action={formAction} className="max-w-xl space-y-4">
+    <form
+      action={formAction}
+      className="w-full space-y-4 rounded-md border p-4 sm:p-6"
+    >
       <input type="hidden" name="kode_game" value={kodeGame} />
       <input type="hidden" name="order_id" value={orderId} />
 
       <p className="text-sm">
         Status pembayaran:{' '}
-        <strong>{kas === 'dibayarkan' ? 'Dibayarkan' : 'Disimpan'}</strong>{' '}
-        <span className="text-xs opacity-70">(diubah oleh admin)</span>
+        {kas === 'dibayarkan' ? (
+          <span className="inline-block rounded bg-green-500/20 px-2 py-0.5 text-xs font-medium text-green-800 dark:text-green-300">
+            Dibayarkan
+          </span>
+        ) : (
+          <span className="inline-block rounded bg-blue-500/20 px-2 py-0.5 text-xs font-medium text-blue-800 dark:text-blue-300">
+            Disimpan
+          </span>
+        )}{' '}
+        <span className="text-xs text-muted-foreground">
+          (diubah oleh admin)
+        </span>
       </p>
 
       <div>
@@ -113,79 +142,67 @@ export default function FormUbah({
         />
       </div>
 
-      <div>
-        <label htmlFor="harga" className="block text-sm font-medium">
-          Harga (Rp)
-        </label>
-        <input
-          id="harga"
-          name="harga"
-          inputMode="numeric"
-          required
-          defaultValue={nilai.harga}
-          className={kelas}
-        />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="harga" className="block text-sm font-medium">
+            Harga (Rp)
+          </label>
+          <input
+            id="harga"
+            name="harga"
+            inputMode="numeric"
+            required
+            defaultValue={nilai.harga}
+            className={kelas}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="charge" className="block text-sm font-medium">
+            Charge (Rp)
+          </label>
+          <input
+            id="charge"
+            name="charge"
+            inputMode="numeric"
+            defaultValue={nilai.charge}
+            className={kelas}
+          />
+          <p className="mt-1 text-xs text-muted-foreground">
+            Biaya tambahan. Menambah pendapatan worker.
+          </p>
+        </div>
       </div>
 
-      <div>
-        <label htmlFor="charge" className="block text-sm font-medium">
-          Charge (Rp)
-        </label>
-        <input
-          id="charge"
-          name="charge"
-          inputMode="numeric"
-          defaultValue={nilai.charge}
-          className={kelas}
-        />
-        <p className="mt-1 text-xs opacity-70">
-          Biaya tambahan. Menambah pendapatan worker.
-        </p>
-      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="tanggal" className="block text-sm font-medium">
+            Tanggal joki
+          </label>
+          <input
+            id="tanggal"
+            name="tanggal"
+            type="date"
+            required
+            defaultValue={nilai.tanggal}
+            className={kelas}
+          />
+        </div>
 
-      <div>
-        <label htmlFor="refund" className="block text-sm font-medium">
-          Refund (Rp)
-        </label>
-        <input
-          id="refund"
-          name="refund"
-          inputMode="numeric"
-          defaultValue={nilai.refund}
-          className={kelas}
-        />
-        <p className="mt-1 text-xs opacity-70">
-          Boleh sebagian. Mengurangi pendapatan worker.
-        </p>
-      </div>
-
-      <div>
-        <label htmlFor="tanggal" className="block text-sm font-medium">
-          Tanggal joki
-        </label>
-        <input
-          id="tanggal"
-          name="tanggal"
-          type="date"
-          required
-          defaultValue={nilai.tanggal}
-          className={kelas}
-        />
-      </div>
-
-      <div>
-        <label htmlFor="progress" className="block text-sm font-medium">
-          Progress
-        </label>
-        <select
-          id="progress"
-          name="progress"
-          defaultValue={nilai.progress}
-          className={kelas}
-        >
-          <option value="progress">Progress</option>
-          <option value="selesai">Selesai</option>
-        </select>
+        <div>
+          <label htmlFor="progress" className="block text-sm font-medium">
+            Progress
+          </label>
+          <select
+            id="progress"
+            name="progress"
+            defaultValue={nilai.progress}
+            className={kelas}
+          >
+            <option value="progress">Progress</option>
+            <option value="selesai">Selesai</option>
+          </select>
+        </div>
       </div>
 
       <div>
@@ -206,7 +223,11 @@ export default function FormUbah({
           label="Ganti bukti pembayaran (opsional)"
           onSibuk={setMengunggah}
         />
-        <LihatBukti path={buktiBayar} label="Bukti pembayaran" />
+        <LihatBukti
+          path={buktiBayar}
+          label="Bukti pembayaran"
+          bersih={dibersihkan}
+        />
       </div>
 
       <div>
@@ -215,7 +236,24 @@ export default function FormUbah({
           label="Bukti selesai / chat customer (wajib saat status Selesai)"
           onSibuk={setMengunggah}
         />
-        <LihatBukti path={buktiSelesai} label="Bukti selesai" />
+        <LihatBukti
+          path={buktiSelesai}
+          label="Bukti selesai"
+          bersih={dibersihkan}
+        />
+      </div>
+
+      <div>
+        <UnggahBukti
+          nama="bukti_charge"
+          label="Bukti tambahan charge (wajib jika charge bertambah)"
+          onSibuk={setMengunggah}
+        />
+        <LihatBukti
+          path={buktiCharge}
+          label="Bukti charge"
+          bersih={dibersihkan}
+        />
       </div>
 
       <div>
@@ -243,12 +281,16 @@ export default function FormUbah({
         />
       </div>
 
-      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+      {state?.error && (
+        <p className="rounded-md border border-red-600/40 bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-300">
+          {state.error}
+        </p>
+      )}
 
       <button
         type="submit"
         disabled={pending || mengunggah}
-        className="rounded bg-black px-4 py-2 text-white disabled:opacity-50"
+        className="w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
       >
         {mengunggah
           ? 'Mengunggah bukti...'

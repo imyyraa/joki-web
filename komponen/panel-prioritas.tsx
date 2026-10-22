@@ -33,16 +33,19 @@ export default async function PanelPrioritas({
 
   if (error) {
     return (
-      <p className="mb-6 text-sm text-red-600">
+      <p className="mb-6 text-sm text-red-600 dark:text-red-400">
         Gagal memuat prioritas: {error.message}
       </p>
     )
   }
 
   const baris = (data ?? []) as Baris[]
+
   if (baris.length === 0) {
     return (
-      <p className="mb-6 text-sm opacity-70">Belum ada worker di game ini.</p>
+      <p className="mb-6 text-sm text-muted-foreground">
+        Belum ada worker di game ini.
+      </p>
     )
   }
 
@@ -53,22 +56,24 @@ export default async function PanelPrioritas({
   const maks = nilaiNormal.length ? Math.max(...nilaiNormal) : 0
 
   return (
-    <section className="mb-8">
+    <section className="mb-8 min-w-0">
       <h2 className="text-lg font-semibold">Prioritas worker {kodeGame}</h2>
-      <p className="mb-2 text-xs opacity-70">
+      <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
         Urutan 1 adalah yang diprioritaskan mengambil joki berikutnya: total
         penghasilan (semua game) paling sedikit, jika sama dilihat jumlah order
         paling sedikit. Worker cadangan ada di bawah.
       </p>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto rounded-md border">
         <table className="w-full min-w-120 border-collapse text-sm">
           <thead>
-            <tr className="border-b text-left">
-              <th className="py-2 pr-3">No</th>
-              <th className="py-2 pr-3">Worker</th>
-              <th className="py-2 pr-3 text-right">Total orderan</th>
-              <th className="py-2 pr-3 text-right">Total penghasilan</th>
-              <th className="py-2 text-right">Kas tersimpan</th>
+            <tr className="border-b bg-muted text-left text-muted-foreground">
+              <th className="px-3 py-2 font-medium">No</th>
+              <th className="px-3 py-2 font-medium">Worker</th>
+              <th className="px-3 py-2 text-right font-medium">Total orderan</th>
+              <th className="px-3 py-2 text-right font-medium">
+                Total penghasilan
+              </th>
+              <th className="px-3 py-2 text-right font-medium">Kas tersimpan</th>
             </tr>
           </thead>
           <tbody>
@@ -77,18 +82,20 @@ export default async function PanelPrioritas({
               return (
                 <tr
                   key={b.worker_id}
-                  className={`border-b ${cadangan ? 'opacity-60' : ''}`}
+                  className={`border-b last:border-b-0 ${cadangan ? 'opacity-60' : ''}`}
                 >
-                  <td className="py-2 pr-3">{b.urutan}</td>
-                  <td className="py-2 pr-3 font-medium">
+                  <td className="px-3 py-2">{b.urutan}</td>
+                  <td className="px-3 py-2 font-medium">
                     {b.nama}
                     {cadangan && (
                       <span className="ml-2 text-xs italic">(cadangan)</span>
                     )}
                   </td>
-                  <td className="py-2 pr-3 text-right">{b.total_orderan}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">
+                    {b.total_orderan}
+                  </td>
                   <td
-                    className="py-2 pr-3 text-right"
+                    className="whitespace-nowrap px-3 py-2 text-right tabular-nums"
                     style={
                       cadangan
                         ? undefined
@@ -103,7 +110,7 @@ export default async function PanelPrioritas({
                   >
                     {rupiah(b.total_penghasilan)}
                   </td>
-                  <td className="py-2 text-right">
+                  <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums">
                     {rupiah(b.total_kas_tersimpan)}
                   </td>
                 </tr>

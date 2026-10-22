@@ -22,11 +22,15 @@ export default function FormOrder({
 }) {
   const [state, formAction, pending] = useActionState(tambahOrder, undefined)
   const [mengunggah, setMengunggah] = useState(false)
-  const kelas = 'mt-1 w-full rounded border px-3 py-2'
+  const kelas =
+    'mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm'
   const awal = state?.nilai
 
   return (
-    <form action={formAction} className="max-w-xl space-y-4">
+    <form
+      action={formAction}
+      className="w-full space-y-4 rounded-md border p-4 sm:p-6"
+    >
       <input type="hidden" name="kode_game" value={kodeGame} />
 
       <div>
@@ -65,33 +69,35 @@ export default function FormOrder({
         />
       </div>
 
-      <div>
-        <label htmlFor="harga" className="block text-sm font-medium">
-          Harga (Rp)
-        </label>
-        <input
-          id="harga"
-          name="harga"
-          inputMode="numeric"
-          placeholder="contoh: 240000"
-          required
-          defaultValue={awal?.harga ?? ''}
-          className={kelas}
-        />
-      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="harga" className="block text-sm font-medium">
+            Harga (Rp)
+          </label>
+          <input
+            id="harga"
+            name="harga"
+            inputMode="numeric"
+            placeholder="contoh: 240000"
+            required
+            defaultValue={awal?.harga ?? ''}
+            className={kelas}
+          />
+        </div>
 
-      <div>
-        <label htmlFor="tanggal" className="block text-sm font-medium">
-          Tanggal joki
-        </label>
-        <input
-          id="tanggal"
-          name="tanggal"
-          type="date"
-          required
-          defaultValue={awal?.tanggal ?? hariIni}
-          className={kelas}
-        />
+        <div>
+          <label htmlFor="tanggal" className="block text-sm font-medium">
+            Tanggal joki
+          </label>
+          <input
+            id="tanggal"
+            name="tanggal"
+            type="date"
+            required
+            defaultValue={awal?.tanggal ?? hariIni}
+            className={kelas}
+          />
+        </div>
       </div>
 
       <div>
@@ -137,12 +143,16 @@ export default function FormOrder({
         />
       </div>
 
-      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+      {state?.error && (
+        <p className="rounded-md border border-red-600/40 bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-300">
+          {state.error}
+        </p>
+      )}
 
       <button
         type="submit"
         disabled={pending || mengunggah}
-        className="rounded bg-black px-4 py-2 text-white disabled:opacity-50"
+        className="w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
       >
         {mengunggah ? 'Mengunggah bukti...' : pending ? 'Menyimpan...' : 'Simpan order'}
       </button>

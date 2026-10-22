@@ -44,7 +44,7 @@ async function Isi({
 
   const { data: privat } = await supabase
     .from('order_privat')
-    .select('no_customer, bukti_bayar, bukti_selesai')
+    .select('no_customer, bukti_bayar, bukti_selesai, bukti_charge, bukti_dibersihkan_pada')
     .eq('order_id', orderId)
     .maybeSingle()
 
@@ -79,17 +79,20 @@ async function Isi({
   return (
     <>
       <Navigasi aktif={kodeGame} />
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-xl font-bold sm:text-2xl">
           Ubah order {order.kode} ({kodeGame})
         </h1>
-        <Link href={`/game/${kodeGame}`} className="text-sm underline">
+        <Link
+          href={`/game/${kodeGame}`}
+          className="rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-muted"
+        >
           Kembali
         </Link>
       </div>
 
       {terkunci ? (
-        <p className="max-w-xl rounded border p-4 text-sm">
+        <p className="w-full rounded-md border border-yellow-500 bg-yellow-500/10 p-4 text-sm">
           Order ini sudah berstatus <strong>Dibayarkan</strong> sehingga
           terkunci. Hanya admin yang dapat mengubahnya.
         </p>
@@ -102,12 +105,13 @@ async function Isi({
           worker={worker}
           buktiBayar={privat?.bukti_bayar ?? null}
           buktiSelesai={privat?.bukti_selesai ?? null}
+          buktiCharge={privat?.bukti_charge ?? null}
+          dibersihkan={!!privat?.bukti_dibersihkan_pada}
           awal={{
             worker_id: String(order.worker_id),
             nama_joki: order.nama_joki,
             harga: String(order.harga),
             charge: String(order.charge),
-            refund: String(order.refund),
             tanggal: order.tanggal,
             progress: order.progress,
             no_customer: privat?.no_customer ?? '',
@@ -126,7 +130,7 @@ export default function HalamanUbah({
   params: Promise<{ kode: string; id: string }>
 }) {
   return (
-    <main className="mx-auto max-w-3xl p-6">
+    <main className="mx-auto w-full max-w-2xl p-4 sm:p-6">
       <Suspense fallback={<p>Memuat...</p>}>
         <Isi params={params} />
       </Suspense>
